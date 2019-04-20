@@ -39,7 +39,7 @@ def printAllFiles(fileDictionary):
 
     #print each file with its id
     for file in fileDictionary:
-        print "%s : %s" % (file["name"], file["id"])
+        print (f"{file['name']} : {file['id']}")
 
 def downloadFile(fileId, fileName, service):
     ''' Downloads the file to the current working directory
@@ -47,14 +47,14 @@ def downloadFile(fileId, fileName, service):
     @service should be a service object from the authenticate method'''
 
     # create a file to write the bytes too
-    fileBuffer = io.FileIO('./%s' % fileName, 'wb')
+    fileBuffer = io.FileIO(f'./{fileName}', 'wb')
     #
     request = service.files().get_media(fileId=fileId)
     downloader = MediaIoBaseDownload(fileBuffer, request)
     done = False
     while done is False:
         status, done = downloader.next_chunk()
-        print "Download %d%%." % int(status.progress() * 100)
+        print (f"Download {int(status.progress() * 100)}%.")
     #convert the buffer to a file
 
     fileBuffer.close()
