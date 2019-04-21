@@ -46,17 +46,20 @@ def downloadFile(fileId, fileName, service):
     @fileId should be a file id
     @service should be a service object from the authenticate method'''
 
-    # create a file to write the bytes too
+    #create a file to write the bytes too
     fileBuffer = io.FileIO(f'./{fileName}', 'wb')
-    #
+    #get the file's content
     request = service.files().get_media(fileId=fileId)
+    #create the download object, pass in fileBuffer and service request
     downloader = MediaIoBaseDownload(fileBuffer, request)
     done = False
+    #while the file is downloading show progress
     while done is False:
+        #download the next chunk, if it is done escape the loop
         status, done = downloader.next_chunk()
+        #print the current progress to the screen
         print (f"Download {int(status.progress() * 100)}%.")
-    #convert the buffer to a file
-
+    #close the file so it can be opened elsewhere
     fileBuffer.close()
 
 def main():
