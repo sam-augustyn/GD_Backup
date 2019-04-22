@@ -2,6 +2,7 @@
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.http import MediaFileUpload
 from magic import from_file
 import io
 
@@ -71,6 +72,9 @@ def uploadFile(fileName, service):
 
     #check the mimetype
     mimetype = from_file(fileName, mime=True)
+    media = MediaFileUpload(fileName, mimetype=mimetype)
+    file = service.files().create(body={'name': fileName.split('/')[-1]},
+                                media_body=media, fields='id').execute()
 
 def main():
     SCOPES = ['https://www.googleapis.com/auth/drive']
@@ -78,6 +82,7 @@ def main():
     #files =  buildFileDictionary(service)
     #printAllFiles(files)
     #downloadFile(files[0]["id"],files[0]["name"], service)
-    uploadFile('file', service)
+    uploadFile('file.txt', service)
+    printAllFiles(buildFileDictionary(service))
 
 if __name__ == "__main__": main()
