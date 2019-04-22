@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
@@ -16,7 +17,7 @@ def authenticate(apiName, apiVersion, apiScope):
     found here: https://developers.google.com/identity/protocols/googlescopes '''
 
     #specify service account file (contains service account information)
-    SERVICE_ACCOUNT_FILE = 'service.json'
+    SERVICE_ACCOUNT_FILE = '../service.json'
     #create a credentials object with the service account file and the specificed scope
     credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=apiScope)
     #build the service object
