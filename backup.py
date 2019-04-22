@@ -72,9 +72,12 @@ def uploadFile(fileName, service):
 
     #check the mimetype
     mimetype = from_file(fileName, mime=True)
+    #creates a media file upload object
+    ###consider chunk size in the future
     media = MediaFileUpload(fileName, mimetype=mimetype)
+    #creates a new file
     file = service.files().create(body={'name': fileName.split('/')[-1]},
-                                media_body=media, fields='id').execute()
+                                media_body=media).execute()
 
 def main():
     SCOPES = ['https://www.googleapis.com/auth/drive']
