@@ -80,7 +80,12 @@ def uploadFile(fileName, service):
     #creates a new file
     file = service.files().create(body={'name': fileName.split('/')[-1]},
                                 media_body=media).execute()
+
 def checkDriveUseage(service):
+    ''' Checks the drive useage for a service object
+    @service should be a service object from the authenticate method'''
+
+    #return the storage quota of the current service object
     return service.about().get(fields='storageQuota').execute()
 
 def main():
