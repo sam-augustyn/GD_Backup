@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from googleapiclient.http import MediaFileUpload
 from magic import from_file
 import io
+import requests
 
 #SCOPES = ['https://www.googleapis.com/auth/drive']
 #SERVICE_ACCOUNT_FILE = 'service.json'
@@ -78,6 +80,8 @@ def uploadFile(fileName, service):
     #creates a new file
     file = service.files().create(body={'name': fileName.split('/')[-1]},
                                 media_body=media).execute()
+def checkDriveUseage(service):
+    return service.about().get(fields='storageQuota').execute()
 
 def main():
     SCOPES = ['https://www.googleapis.com/auth/drive']
@@ -85,7 +89,8 @@ def main():
     #files =  buildFileDictionary(service)
     #printAllFiles(files)
     #downloadFile(files[0]["id"],files[0]["name"], service)
-    uploadFile('file.txt', service)
-    printAllFiles(buildFileDictionary(service))
+    #uploadFile('file.txt', service)
+    #printAllFiles(buildFileDictionary(service))
+    print(checkDriveUseage(service))
 
 if __name__ == "__main__": main()
