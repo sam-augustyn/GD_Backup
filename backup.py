@@ -4,9 +4,9 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from googleapiclient.http import MediaFileUpload
+from hurry.filesize import size
 from magic import from_file
 import io
-import requests
 
 #SCOPES = ['https://www.googleapis.com/auth/drive']
 #SERVICE_ACCOUNT_FILE = 'service.json'
@@ -88,6 +88,13 @@ def checkDriveUseage(service):
     #return the storage quota of the current service object
     return service.about().get(fields='storageQuota').execute()
 
+def printStorageQuota(storageQuota):
+
+    limit = float(storageQuota['limit'])
+    usage = float(storageQuota['usage'])
+    usagePercentage = ("{0:.2f}".format(usage/limit))
+    print(f"Limit: {size(limit)} -- Usage: {size(usage)} -- Usage: {usagePercentage}%")
+
 def main():
     SCOPES = ['https://www.googleapis.com/auth/drive']
     service = authenticate('drive', 'v3', SCOPES)
@@ -96,6 +103,6 @@ def main():
     #downloadFile(files[0]["id"],files[0]["name"], service)
     #uploadFile('file.txt', service)
     #printAllFiles(buildFileDictionary(service))
-    print(checkDriveUseage(service))
+    printStorageQuota(checkDriveUseage(service).get('storageQuota'))
 
 if __name__ == "__main__": main()
