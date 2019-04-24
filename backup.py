@@ -41,7 +41,11 @@ def buildFileDictionary(service):
 def printAllFiles(fileDictionary):
     ''' Prints out a list of files from a dictionary
     @fileDictionary should be a dictionary containing filenames and file ids '''
-    print("{0:16} {1:34} {2:6} {3:20} {4:5}".format("Name", "Id", "Size", "Modified", "Hash"))
+
+    #print the column names
+    print("{0:16} {1:34} {2:6} {3:20} {4:5}".format("Name", "Id", "Size",
+                                                "Modified", "Hash"))
+    #for each file print out its respective column
     for file in fileDictionary:
         print ("{0:16} {1:34} {2:6} {3:20} {4:5}".format(file['name'], file['id'],
                                     size(int(file['size'])),
