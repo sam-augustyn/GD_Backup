@@ -2,11 +2,11 @@
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
-from googleapiclient.http import MediaFileUpload
+from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
 from hurry.filesize import size
+from pyrfc3339 import parse
 from magic import from_file
-import io
+import io, datetime
 
 #SCOPES = ['https://www.googleapis.com/auth/drive']
 #SERVICE_ACCOUNT_FILE = 'service.json'
@@ -34,17 +34,19 @@ def buildFileDictionary(service):
     @service should be the service object generated in authenticate '''
 
     # Call the Drive v3 API
-    results = service.files().list(fields="nextPageToken, files(id, name)").execute()
+    results = service.files().list(fields="files(id, name, size, md5Checksum, modifiedTime)").execute()
     # return an array of files with their associated id
     return results.get('files', [])
 
 def printAllFiles(fileDictionary):
     ''' Prints out a list of files from a dictionary
     @fileDictionary should be a dictionary containing filenames and file ids '''
-
-    #print each file with its id
+    print("{0:16} {1:34} {2:6} {3:20} {4:5}".format("Name", "Id", "Size", "Modified", "Hash"))
     for file in fileDictionary:
-        print (f"{file['name']} : {file['id']}")
+        print ("{0:16} {1:34} {2:6} {3:20} {4:5}".format(file['name'], file['id'],
+                                    size(int(file['size'])),
+                                    parse(file['modifiedTime']).strftime('%m/%d/%Y-%H:%M:%S'),
+                                    file['md5Checksum']))
 
 def downloadFile(fileId, fileName, service):
     ''' Downloads the file to the current working directory
@@ -104,11 +106,11 @@ def printStorageQuota(storageQuota):
 def main():
     SCOPES = ['https://www.googleapis.com/auth/drive']
     service = authenticate('drive', 'v3', SCOPES)
-    #files =  buildFileDictionary(service)
-    #printAllFiles(files)
+    files =  buildFileDictionary(service)
+    printAllFiles(files)
     #downloadFile(files[0]["id"],files[0]["name"], service)
     #uploadFile('file.txt', service)
     #printAllFiles(buildFileDictionary(service))
-    printStorageQuota(checkDriveUseage(service).get('storageQuota'))
+    #printStorageQuota(checkDriveUseage(service).get('storageQuota'))
 
 if __name__ == "__main__": main()
