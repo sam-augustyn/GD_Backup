@@ -40,7 +40,7 @@ def buildFileDictionary(service):
 
 def printAllFiles(fileDictionary):
     ''' Prints out a list of files from a dictionary
-    @fileDictionary should be a dictionary containing filenames and file ids'''
+    @fileDictionary should be a dictionary containing filenames and file ids '''
 
     #print each file with its id
     for file in fileDictionary:
@@ -49,7 +49,7 @@ def printAllFiles(fileDictionary):
 def downloadFile(fileId, fileName, service):
     ''' Downloads the file to the current working directory
     @fileId should be a file id
-    @service should be a service object from the authenticate method'''
+    @service should be a service object from the authenticate method '''
 
     #create a file to write the bytes too
     fileBuffer = io.FileIO(f'./{fileName}', 'wb')
@@ -70,7 +70,7 @@ def downloadFile(fileId, fileName, service):
 def uploadFile(fileName, service):
     ''' Uploads a file to a specificed location in the drive
     @fileName should be the file that should be uploaded
-    @service should be a service object from the authenticate method'''
+    @service should be a service object from the authenticate method '''
 
     #check the mimetype
     mimetype = from_file(fileName, mime=True)
@@ -83,16 +83,22 @@ def uploadFile(fileName, service):
 
 def checkDriveUseage(service):
     ''' Checks the drive useage for a service object
-    @service should be a service object from the authenticate method'''
+    @service should be a service object from the authenticate method '''
 
     #return the storage quota of the current service object
     return service.about().get(fields='storageQuota').execute()
 
 def printStorageQuota(storageQuota):
+    ''' Prints the storage quota for the current service object
+    @storageQuota should be the result returned from about.get() '''
 
+    #get google drive limit
     limit = float(storageQuota['limit'])
+    #get the usage of the drive
     usage = float(storageQuota['usage'])
+    #get the usage percentage
     usagePercentage = ("{0:.2f}".format(usage/limit))
+    #print out the results
     print(f"Limit: {size(limit)} -- Usage: {size(usage)} -- Usage: {usagePercentage}%")
 
 def main():
