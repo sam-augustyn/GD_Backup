@@ -52,6 +52,14 @@ def printAllFiles(fileDictionary):
                                     parse(file['modifiedTime']).strftime('%m/%d/%Y-%H:%M:%S'),
                                     file['md5Checksum']))
 
+def getFileMetadata(fileId, service):
+    ''' Get the metadata of a file
+    @fileId is the id of the file
+    @service is the service object '''
+
+    #rturn the metadata of the file
+    return service.files().get(fileId=fileId).execute()
+
 def downloadFile(fileId, fileName, service):
     ''' Downloads the file to the current working directory
     @fileId should be a file id
@@ -87,6 +95,9 @@ def uploadFile(fileName, service):
     file = service.files().create(body={'name': fileName.split('/')[-1]},
                                 media_body=media).execute()
 
+#def shareFile(fileId, service):
+
+
 def checkDriveUseage(service):
     ''' Checks the drive useage for a service object
     @service should be a service object from the authenticate method '''
@@ -111,7 +122,7 @@ def main():
     SCOPES = ['https://www.googleapis.com/auth/drive']
     service = authenticate('drive', 'v3', SCOPES)
     files =  buildFileDictionary(service)
-    printAllFiles(files)
+    getFileMetadata(files[0]['id'], service)
     #downloadFile(files[0]["id"],files[0]["name"], service)
     #uploadFile('file.txt', service)
     #printAllFiles(buildFileDictionary(service))
