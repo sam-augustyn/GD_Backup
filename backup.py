@@ -95,8 +95,16 @@ def uploadFile(fileName, service):
     file = service.files().create(body={'name': fileName.split('/')[-1]},
                                 media_body=media).execute()
 
-#def shareFile(fileId, service):
+def shareFile(fileId, service, email):
+    ''' Shares a file with a specified user
+    @fileId, shared file id
+    @service is the service object from the authenticate method
+    @email is the email of who you are sharing the file with'''
 
+    #create the permission body
+    permission = {'type':'user', 'role':'writer', 'emailAddress':email}
+    #create the permission with the associated file
+    service.permissions().create(fileId=fileId, body=permission).execute()
 
 def checkDriveUseage(service):
     ''' Checks the drive useage for a service object
@@ -122,7 +130,8 @@ def main():
     SCOPES = ['https://www.googleapis.com/auth/drive']
     service = authenticate('drive', 'v3', SCOPES)
     files =  buildFileDictionary(service)
-    getFileMetadata(files[0]['id'], service)
+    shareFile(files[0]['id'], service, "email")
+    #getFileMetadata(files[0]['id'], service)
     #downloadFile(files[0]["id"],files[0]["name"], service)
     #uploadFile('file.txt', service)
     #printAllFiles(buildFileDictionary(service))
