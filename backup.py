@@ -8,10 +8,6 @@ from pyrfc3339 import parse
 from magic import from_file
 import io, datetime
 
-#SCOPES = ['https://www.googleapis.com/auth/drive']
-#SERVICE_ACCOUNT_FILE = 'service.json'
-
-
 def authenticate(apiName, apiVersion, apiScope):
     ''' Authenticate the user and returns a service object
     @apiName should be the name of the google api
@@ -29,7 +25,8 @@ def authenticate(apiName, apiVersion, apiScope):
     #return the service object
     return service
 
-def buildFileDictionary(service):
+''' ---REMOTE GET METHODS---'''
+def getFileDictionary(service):
     ''' Return a dictionary with the format files{name:id}
     @service should be the service object generated in authenticate '''
 
@@ -38,6 +35,22 @@ def buildFileDictionary(service):
     # return an array of files with their associated id
     return results.get('files', [])
 
+def getFileMetadata(fileId, service):
+    ''' Get the metadata of a file
+    @fileId is the id of the file
+    @service is the service object '''
+
+    #rturn the metadata of the file
+    return service.files().get(fileId=fileId).execute()
+
+def getDriveUseage(service):
+    ''' Checks the drive useage for a service object
+    @service should be a service object from the authenticate method '''
+
+    #return the storage quota of the current service object
+    return service.about().get(fields='storageQuota').execute()
+
+''' ---PRINT METHODS--- '''
 def printAllFiles(fileDictionary):
     ''' Prints out a list of files from a dictionary
     @fileDictionary should be a dictionary containing filenames and file ids '''
@@ -52,13 +65,37 @@ def printAllFiles(fileDictionary):
                                     parse(file['modifiedTime']).strftime('%m/%d/%Y-%H:%M:%S'),
                                     file['md5Checksum']))
 
-def getFileMetadata(fileId, service):
-    ''' Get the metadata of a file
-    @fileId is the id of the file
-    @service is the service object '''
+def printStorageQuota(storageQuota):
+    ''' Prints the storage quota for the current service object
+    @storageQuota should be the result returned from about.get() '''
 
-    #rturn the metadata of the file
-    return service.files().get(fileId=fileId).execute()
+    #get google drive limit
+    limit = float(storageQuota['limit'])
+    #get the usage of the drive
+    usage = float(storageQuota['usage'])
+    #get the usage percentage
+    usagePercentage = ("{0:.2f}".format(usage/limit))
+    #set table format values
+    tableFormatting = "{0:7} {1:6} {2:10}"
+    #print out the results
+    print(tableFormatting.format("Limit", "Usage", "Percentage\n") +
+        tableFormatting.format(size(limit), size(usage), usagePercentage + "%"))
+
+
+''' ---REMOTE FILE MANAGEMENT--- '''
+def uploadFile(fileName, service):
+    ''' Uploads a file to a specificed location in the drive
+    @fileName should be the file that should be uploaded
+    @service should be a service object from the authenticate method '''
+
+    #check the mimetype
+    mimetype = from_file(fileName, mime=True)
+    #creates a media file upload object
+    ###consider chunk size in the future
+    media = MediaFileUpload(fileName, mimetype=mimetype)
+    #creates a new file
+    file = service.files().create(body={'name': fileName.split('/')[-1]},
+                                media_body=media).execute()
 
 def downloadFile(fileId, fileName, service):
     ''' Downloads the file to the current working directory
@@ -81,20 +118,6 @@ def downloadFile(fileId, fileName, service):
     #close the file so it can be opened elsewhere
     fileBuffer.close()
 
-def uploadFile(fileName, service):
-    ''' Uploads a file to a specificed location in the drive
-    @fileName should be the file that should be uploaded
-    @service should be a service object from the authenticate method '''
-
-    #check the mimetype
-    mimetype = from_file(fileName, mime=True)
-    #creates a media file upload object
-    ###consider chunk size in the future
-    media = MediaFileUpload(fileName, mimetype=mimetype)
-    #creates a new file
-    file = service.files().create(body={'name': fileName.split('/')[-1]},
-                                media_body=media).execute()
-
 def shareFile(fileId, service, email):
     ''' Shares a file with a specified user
     @fileId, shared file id
@@ -106,40 +129,13 @@ def shareFile(fileId, service, email):
     #create the permission with the associated file
     service.permissions().create(fileId=fileId, body=permission).execute()
 
-def checkDriveUseage(service):
-    ''' Checks the drive useage for a service object
-    @service should be a service object from the authenticate method '''
+''' ---LOCAL FILE METHODS---'''
 
-    #return the storage quota of the current service object
-    return service.about().get(fields='storageQuota').execute()
-
-def printStorageQuota(storageQuota):
-    ''' Prints the storage quota for the current service object
-    @storageQuota should be the result returned from about.get() '''
-
-    #get google drive limit
-    limit = float(storageQuota['limit'])
-    #get the usage of the drive
-    usage = float(storageQuota['usage'])
-    #get the usage percentage
-    usagePercentage = ("{0:.2f}".format(usage/limit))
-    #set table format values
-    tableFormatting = "{0:7} {1:6} {2:10}"
-    #print out the results
-    print(tableFormatting.format("Limit", "Usage", "Percentage\n") +
-        tableFormatting.format(size(limit), size(usage), usagePercentage + "%"))
 
 def main():
     SCOPES = ['https://www.googleapis.com/auth/drive']
     service = authenticate('drive', 'v3', SCOPES)
-    files =  buildFileDictionary(service)
+    files =  getFileDictionary(service)
     printAllFiles (files)
     printStorageQuota(checkDriveUseage(service).get('storageQuota'))
-    #shareFile(files[0]['id'], service, "email")
-    #getFileMetadata(files[0]['id'], service)
-    #downloadFile(files[0]["id"],files[0]["name"], service)
-    #uploadFile('file.txt', service)
-    #printAllFiles(buildFileDictionary(service))
-    #printStorageQuota(checkDriveUseage(service).get('storageQuota'))
-
 if __name__ == "__main__": main()
