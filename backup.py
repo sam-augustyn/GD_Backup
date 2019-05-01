@@ -21,7 +21,7 @@ def authenticate(apiName, apiVersion, apiScope):
     found here: https://developers.google.com/identity/protocols/googlescopes '''
 
     #specify service account file (contains service account information)
-    SERVICE_ACCOUNT_FILE = '../service.json'
+    SERVICE_ACCOUNT_FILE = '../drive0.json'
     #create a credentials object with the service account file and the specificed scope
     credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=apiScope)
     #build the service object
@@ -123,14 +123,19 @@ def printStorageQuota(storageQuota):
     usage = float(storageQuota['usage'])
     #get the usage percentage
     usagePercentage = ("{0:.2f}".format(usage/limit))
+    #set table format values
+    tableFormatting = "{0:7} {1:6} {2:10}"
     #print out the results
-    print(f"Limit: {size(limit)} -- Usage: {size(usage)} -- Usage: {usagePercentage}%")
+    print(tableFormatting.format("Limit", "Usage", "Percentage\n") +
+        tableFormatting.format(size(limit), size(usage), usagePercentage + "%"))
 
 def main():
     SCOPES = ['https://www.googleapis.com/auth/drive']
     service = authenticate('drive', 'v3', SCOPES)
     files =  buildFileDictionary(service)
-    shareFile(files[0]['id'], service, "email")
+    printAllFiles (files)
+    printStorageQuota(checkDriveUseage(service).get('storageQuota'))
+    #shareFile(files[0]['id'], service, "email")
     #getFileMetadata(files[0]['id'], service)
     #downloadFile(files[0]["id"],files[0]["name"], service)
     #uploadFile('file.txt', service)
