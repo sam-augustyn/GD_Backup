@@ -6,7 +6,7 @@ from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
 from hurry.filesize import size
 from pyrfc3339 import parse
 from magic import from_file
-import io, datetime
+import io, datetime, os
 
 def authenticate(apiName, apiVersion, apiScope):
     ''' Authenticate the user and returns a service object
@@ -81,7 +81,6 @@ def printStorageQuota(storageQuota):
     print(tableFormatting.format("Limit", "Usage", "Percentage\n") +
         tableFormatting.format(size(limit), size(usage), usagePercentage + "%"))
 
-
 ''' ---REMOTE FILE MANAGEMENT--- '''
 def uploadFile(fileName, service):
     ''' Uploads a file to a specificed location in the drive
@@ -130,12 +129,21 @@ def shareFile(fileId, service, email):
     service.permissions().create(fileId=fileId, body=permission).execute()
 
 ''' ---LOCAL FILE METHODS---'''
+def getContents(directory):
+    return os.listdir(directory)
 
+def getLocalDirectories(directory, contents):
+    for item in contents:
+        if os.path.isdir(directory + item):
+            print (item)
 
 def main():
-    SCOPES = ['https://www.googleapis.com/auth/drive']
+    '''SCOPES = ['https://www.googleapis.com/auth/drive']
     service = authenticate('drive', 'v3', SCOPES)
     files =  getFileDictionary(service)
     printAllFiles (files)
-    printStorageQuota(checkDriveUseage(service).get('storageQuota'))
+    printStorageQuota(checkDriveUseage(service).get('storageQuota'))'''
+
+    getLocalDirectories('./test-folder/', getContents('./test-folder'))
+
 if __name__ == "__main__": main()
