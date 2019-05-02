@@ -50,6 +50,25 @@ def getDriveUseage(service):
     #return the storage quota of the current service object
     return service.about().get(fields='storageQuota').execute()
 
+def getFileId(service, fileName):
+    ''' Gets the file id of the specified file
+    @service should be the service object
+    @fileName should be the name of the file'''
+
+    #initlize return variable
+    fileId = ''
+    #get the list of files
+    fileList = getFileDictionary(service)
+    #loop through the all the files
+    for file in fileList:
+        #if the file name exists
+        if fileName in file['name']:
+            #set the return value
+            fileId = file['id']
+    #return the file id of the file
+    return fileId
+
+
 ''' ---PRINT METHODS--- '''
 def printAllFiles(fileDictionary):
     ''' Prints out a list of files from a dictionary
@@ -96,7 +115,14 @@ def uploadFile(fileName, service):
     file = service.files().create(body={'name': fileName.split('/')[-1]},
                                 media_body=media).execute()
 
-def downloadFile(fileId, fileName, service):
+def uploadFileList(service, fileList):
+    ''' Uploads a list of files
+    @service should be a service object
+    @fileList is the list of files'''
+    for file in fileList:
+        uploadFile(file, service)
+
+def downloadFile(service, fileName):
     ''' Downloads the file to the current working directory
     @fileId should be a file id
     @service should be a service object from the authenticate method '''
@@ -104,7 +130,7 @@ def downloadFile(fileId, fileName, service):
     #create a file to write the bytes too
     fileBuffer = io.FileIO(f'./{fileName}', 'wb')
     #get the file's content
-    request = service.files().get_media(fileId=fileId)
+    request = service.files().get_media(fileId=getFileId(service, fileName))
     #create the download object, pass in fileBuffer and service request
     downloader = MediaIoBaseDownload(fileBuffer, request)
     done = False
@@ -116,6 +142,8 @@ def downloadFile(fileId, fileName, service):
         print (f"Download {int(status.progress() * 100)}%.")
     #close the file so it can be opened elsewhere
     fileBuffer.close()
+
+#def deleteFile(fileId, )
 
 def shareFile(fileId, service, email):
     ''' Shares a file with a specified user
@@ -133,17 +161,26 @@ def getContents(directory):
     return os.listdir(directory)
 
 def getLocalDirectories(directory, contents):
+    directoryList = []
     for item in contents:
         if os.path.isdir(directory + item):
-            print (item)
+            directoryList.append(item)
+    return directoryList
+
+def getLocalFiles(directory, contents):
+    fileList = []
+    for item in contents:
+        if os.path.isfile(directory + item):
+            fileList.append(directory + item)
+    return fileList
 
 def main():
-    '''SCOPES = ['https://www.googleapis.com/auth/drive']
+    SCOPES = ['https://www.googleapis.com/auth/drive']
     service = authenticate('drive', 'v3', SCOPES)
     files =  getFileDictionary(service)
-    printAllFiles (files)
-    printStorageQuota(checkDriveUseage(service).get('storageQuota'))'''
-
-    getLocalDirectories('./test-folder/', getContents('./test-folder'))
+    print (getFileId(service,'file1.txt'))
+    #uploadFileList(service, getLocalFiles('./test-folder/', getContents('./test-folder')))
+    #printAllFiles (files)
+    #printStorageQuota(getDriveUseage(service).get('storageQuota'))
 
 if __name__ == "__main__": main()
