@@ -162,6 +162,10 @@ def shareFile(fileId, service, email):
     #create the permission with the associated file
     service.permissions().create(fileId=fileId, body=permission).execute()
 
+def createDirectory(service, directoryName):
+    file_metadata = {'name': directoryName,'mimeType': 'application/vnd.google-apps.folder'}
+    service.files().create(body=file_metadata).execute()
+
 ''' ---LOCAL FILE METHODS---'''
 def getContents(directory):
     return os.listdir(directory)
@@ -170,7 +174,7 @@ def getLocalDirectories(directory, contents):
     directoryList = []
     for item in contents:
         if os.path.isdir(directory + item):
-            directoryList.append(item)
+            directoryList.append(directory + item)
     return directoryList
 
 def getLocalFiles(directory, contents):
@@ -184,9 +188,9 @@ def main():
     SCOPES = ['https://www.googleapis.com/auth/drive']
     service = authenticate('drive', 'v3', SCOPES)
     files =  getFileDictionary(service)
-    deleteFile(service, 'Getting started')
-    #uploadFileList(service, getLocalFiles('./test-folder/', getContents('./test-folder')))
-    printAllFiles(getFileDictionary(service))
+    createDirectory(service, 'folder')
+    print(getFileMetadata(service, 'file1.txt'))
+    #printAllFiles(getFileDictionary(service))
     #printStorageQuota(getDriveUseage(service).get('storageQuota'))
 
 if __name__ == "__main__": main()
