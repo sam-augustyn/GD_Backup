@@ -35,13 +35,13 @@ def getFileDictionary(service):
     # return an array of files with their associated id
     return results.get('files', [])
 
-def getFileMetadata(fileId, service):
+def getFileMetadata(service, fileName):
     ''' Get the metadata of a file
     @fileId is the id of the file
     @service is the service object '''
 
-    #rturn the metadata of the file
-    return service.files().get(fileId=fileId).execute()
+    #return the metadata of the file
+    return service.files().get(fileId=getFileId(service, fileName)).execute()
 
 def getDriveUseage(service):
     ''' Checks the drive useage for a service object
