@@ -48,7 +48,7 @@ def getDriveUseage(service):
     @service should be a service object from the authenticate method '''
 
     #return the storage quota of the current service object
-    return service.about().get(fields='storageQuota').execute()
+    return service.about().get(fields='storageQuota').execute().get('storageQuota')
 
 def getFileId(service, fileName):
     ''' Gets the file id of the specified file
@@ -101,7 +101,7 @@ def printStorageQuota(storageQuota):
         tableFormatting.format(size(limit), size(usage), usagePercentage + "%"))
 
 ''' ---REMOTE FILE MANAGEMENT--- '''
-def uploadFile(fileName, service):
+def uploadFile(service, fileName):
     ''' Uploads a file to a specificed location in the drive
     @fileName should be the file that should be uploaded
     @service should be a service object from the authenticate method '''
@@ -143,7 +143,13 @@ def downloadFile(service, fileName):
     #close the file so it can be opened elsewhere
     fileBuffer.close()
 
-#def deleteFile(fileId, )
+def deleteFile(service, fileName):
+    ''' Deletes a specified file
+    @service should be a service object
+    @fileName should be the file that should be deleted '''
+
+    #delete the file
+    service.files().delete(fileId=getFileId(service, fileName)).execute()
 
 def shareFile(fileId, service, email):
     ''' Shares a file with a specified user
@@ -178,9 +184,9 @@ def main():
     SCOPES = ['https://www.googleapis.com/auth/drive']
     service = authenticate('drive', 'v3', SCOPES)
     files =  getFileDictionary(service)
-    print (getFileId(service,'file1.txt'))
+    deleteFile(service, 'Getting started')
     #uploadFileList(service, getLocalFiles('./test-folder/', getContents('./test-folder')))
-    #printAllFiles (files)
+    printAllFiles(getFileDictionary(service))
     #printStorageQuota(getDriveUseage(service).get('storageQuota'))
 
 if __name__ == "__main__": main()
