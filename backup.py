@@ -31,9 +31,31 @@ def getFileDictionary(service):
     @service should be the service object generated in authenticate '''
 
     # Call the Drive v3 API
-    results = service.files().list(fields="files(id, name, size, md5Checksum, modifiedTime)").execute()
+    results = service.files().list(fields="files(id, name, size, md5Checksum, modifiedTime, mimeType)").execute().get('files')
+    files = []
+    #loop through all items in array
+    for item in results:
+        #if the item is a file
+        if item['mimeType'] != 'application/vnd.google-apps.folder':
+            #remove from the list
+            files.append(item)
     # return an array of files with their associated id
-    return results.get('files', [])
+    return files
+
+def getDirectoryDictionary(service):
+    ''' Return a dictionary containing all of the directories
+    @service should be the service object generated in authenticate '''
+
+    # Call the Drive v3 API
+    results = service.files().list(fields="files(id, name, size, md5Checksum, modifiedTime, mimeType)").execute().get('files')
+    directories = []
+    #loop through all items in array
+    for item in results:
+        if item['mimeType'] == 'application/vnd.google-apps.folder':
+            #add to the list
+            directories.append(item)
+    return directories
+
 
 def getFileMetadata(service, fileName):
     ''' Get the metadata of a file
@@ -68,18 +90,22 @@ def getFileId(service, fileName):
     #return the file id of the file
     return fileId
 
+def getFolderId():
+    print ('test')
+
 
 ''' ---PRINT METHODS--- '''
 def printAllFiles(fileDictionary):
     ''' Prints out a list of files from a dictionary
     @fileDictionary should be a dictionary containing filenames and file ids '''
 
+    #formating string
+    format = "{0:16} {1:34} {2:6} {3:20} {4:5}"
     #print the column names
-    print("{0:16} {1:34} {2:6} {3:20} {4:5}".format("Name", "Id", "Size",
-                                                "Modified", "Hash"))
+    print(format.format("Name", "Id", "Size", "Modified", "Hash"))
     #for each file print out its respective column
     for file in fileDictionary:
-        print ("{0:16} {1:34} {2:6} {3:20} {4:5}".format(file['name'], file['id'],
+        print (format.format(file['name'], file['id'],
                                     size(int(file['size'])),
                                     parse(file['modifiedTime']).strftime('%m/%d/%Y-%H:%M:%S'),
                                     file['md5Checksum']))
@@ -188,9 +214,11 @@ def main():
     SCOPES = ['https://www.googleapis.com/auth/drive']
     service = authenticate('drive', 'v3', SCOPES)
     files =  getFileDictionary(service)
-    createDirectory(service, 'folder')
-    print(getFileMetadata(service, 'file1.txt'))
+    #createDirectory(service, 'folder')
+    #print(getFileMetadata(service, 'file1.txt'))
+    #deleteFile(service, 'folder')
     #printAllFiles(getFileDictionary(service))
+    print(getDirectoryDictionary(service))
     #printStorageQuota(getDriveUseage(service).get('storageQuota'))
 
 if __name__ == "__main__": main()
