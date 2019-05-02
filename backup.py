@@ -90,8 +90,22 @@ def getFileId(service, fileName):
     #return the file id of the file
     return fileId
 
-def getFolderId():
-    print ('test')
+def getDirectoryId(service, directoryName):
+    ''' Gets the file id of the specified file
+    @service should be the service object
+    @directoryName should be the name of the directory'''
+
+    directoryId = ''
+    #get all the directories
+    directoryList = getDirectoryDictionary(service)
+    #loop through all the directories
+    for directory in directoryList:
+        #the directory matches the name
+        if directory['name'] == directoryName:
+            #set the directory id
+            directoryId = directory['id']
+    #return the id of the directory
+    return directoryId
 
 
 ''' ---PRINT METHODS--- '''
@@ -145,6 +159,8 @@ def uploadFileList(service, fileList):
     ''' Uploads a list of files
     @service should be a service object
     @fileList is the list of files'''
+
+    #for each file, upload it
     for file in fileList:
         uploadFile(file, service)
 
@@ -218,7 +234,7 @@ def main():
     #print(getFileMetadata(service, 'file1.txt'))
     #deleteFile(service, 'folder')
     #printAllFiles(getFileDictionary(service))
-    print(getDirectoryDictionary(service))
+    print (getDirectoryId(service, 'folder'))
     #printStorageQuota(getDriveUseage(service).get('storageQuota'))
 
 if __name__ == "__main__": main()
