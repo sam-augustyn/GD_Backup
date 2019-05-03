@@ -107,7 +107,6 @@ def getDirectoryId(service, directoryName):
     #return the id of the directory
     return directoryId
 
-
 ''' ---PRINT METHODS--- '''
 def printAllFiles(fileDictionary):
     ''' Prints out a list of files from a dictionary
@@ -141,7 +140,7 @@ def printStorageQuota(storageQuota):
         tableFormatting.format(size(limit), size(usage), usagePercentage + "%"))
 
 ''' ---REMOTE FILE MANAGEMENT--- '''
-def uploadFile(service, fileName):
+def uploadFile(service, fileName, directoryName):
     ''' Uploads a file to a specificed location in the drive
     @fileName should be the file that should be uploaded
     @service should be a service object from the authenticate method '''
@@ -152,7 +151,7 @@ def uploadFile(service, fileName):
     ###consider chunk size in the future
     media = MediaFileUpload(fileName, mimetype=mimetype)
     #creates a new file
-    file = service.files().create(body={'name': fileName.split('/')[-1]},
+    file = service.files().create(body={'name': fileName.split('/')[-1], 'parent' : getDirectoryId(service, directoryName)},
                                 media_body=media).execute()
 
 def uploadFileList(service, fileList):
@@ -230,11 +229,15 @@ def main():
     SCOPES = ['https://www.googleapis.com/auth/drive']
     service = authenticate('drive', 'v3', SCOPES)
     files =  getFileDictionary(service)
+    folder = getDirectoryDictionary(service)
     #createDirectory(service, 'folder')
     #print(getFileMetadata(service, 'file1.txt'))
     #deleteFile(service, 'folder')
-    #printAllFiles(getFileDictionary(service))
-    print (getDirectoryId(service, 'folder'))
+    printAllFiles(getFileDictionary(service))
+    print(folder)
+    #createDirectory(service, 'test-folder2')
+    #print (getDirectoryId(service, 'test-folder2'))
+    #uploadFile(service, './test-folder/test-folder2/passwords', 'test-folder2')
     #printStorageQuota(getDriveUseage(service).get('storageQuota'))
 
 if __name__ == "__main__": main()
